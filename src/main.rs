@@ -111,7 +111,7 @@ fn secret_split(secret: String, shares_number: u8, threshold: u8) -> Vec<String>
     let shamir_secret = SecretData::with_secret(normalize_string(secret).as_str(), threshold);
     let mut i = 1;
     while i <= shares_number {
-        shares.push(hex::encode(shamir_secret.get_share(i.clone()).unwrap()));
+        shares.push(hex::encode(shamir_secret.get_share(i).unwrap()));
         i += 1;
     }
     shares
