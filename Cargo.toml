@@ -1,0 +1,12 @@
+[package]
+name = "ssss-rs"
+version = "0.1.0"
+authors = ["Aitor Pazos <mail@aitorpazos.es>"]
+
+[dependencies]
+base64 = "0.13"
+bip39 = "1.0.1"
+clap = "2.33.3"
+hex = "0.4"
+regex = "1.4"
+shamir = "2.0.0"

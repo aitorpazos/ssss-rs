@@ -1,0 +1,47 @@
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Create Release
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: Build release
+        uses: icepuma/rust-action@master
+        with:
+          args: cargo fmt -- --check && cargo clippy -- -Dwarnings && cargo doc && cargo test && cargo build --release
+      - name: Package release
+        run: cd target/release && tar -cvf ../../ssss-rs-amd64.tar.gz ssss-rs 
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            Changes in this Release
+            - First Change
+          draft: true
+          prerelease: false
+      - name: Upload Release binary
+        id: upload-release-asset-min
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./ssss-rs-amd64.tar.gz
+          asset_name: ssss-rs-amd64-${{ steps.get_version.outputs.VERSION }}.tar.gz
+          asset_content_type: application/tar+gzip
